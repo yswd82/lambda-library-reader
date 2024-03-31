@@ -1,0 +1,4 @@
+playwright
+awslambdaric
+pandas
+boto3

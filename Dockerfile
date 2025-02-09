@@ -28,7 +28,7 @@ RUN python -m pip install --target ${FUNCTION_DIR} playwright awslambdaric
 RUN python -m pip install --target ${FUNCTION_DIR} boto3 pandas
 
 # Multi-stage build: grab a fresh copy of the base image
-FROM mcr.microsoft.com/playwright/python:v1.50.1-noble
+FROM mcr.microsoft.com/playwright/python:v1.50.0-noble
 
 # Include global arg in this stage of the build
 ARG FUNCTION_DIR

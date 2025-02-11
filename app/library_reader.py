@@ -58,9 +58,13 @@ def create_browser(playwright: Playwright):
 class LibraryReader(metaclass=ABCMeta):
     URL: str
 
-    def __init__(self, user, password) -> None:
-        self.card = user
-        self.password = password
+    def __init__(self, user: str, password: str) -> None:
+        self.card: str = user
+        self.password: str = password
+        self.page: Page = None
+
+    def _login(self) -> Page:
+        pass
 
     @property
     def lent(self) -> list[LentItem]:
@@ -76,20 +80,26 @@ class SuginamiLibraryReader(LibraryReader):
         "https://www.library.city.suginami.tokyo.jp/licsxp-opac/WOpacSmtMnuTopAction.do"
     )
 
+    def _login(self, context) -> Page:
+        # ログインする
+        page: Page = context.new_page()
+        page.goto(self.URL)
+        page.get_by_role("link", name="マイ図書館メニューを開きます").click()
+        page.get_by_role("link", name="ログイン").click()
+        page.fill('input[name="username"]', self.card)
+        page.fill('input[name="j_password"]', self.password)
+        page.get_by_role("button", name="ログイン").click()
+
+        return page
+
     @property
     def lent(self):
         with sync_playwright() as playwright:
             browser: Browser = create_browser(playwright)
             context: BrowserContext = browser.new_context()
 
-            # ログインする
-            page: Page = context.new_page()
-            page.goto(self.URL)
-            page.get_by_role("link", name="マイ図書館メニューを開きます").click()
-            page.get_by_role("link", name="ログイン").click()
-            page.fill('input[name="username"]', self.card)
-            page.fill('input[name="j_password"]', self.password)
-            page.get_by_role("button", name="ログイン").click()
+            # ログイン
+            page: Page = self._login(context)
 
             # ページ読み込み
             page.click('a[id="stat-lent"]')
@@ -128,13 +138,7 @@ class SuginamiLibraryReader(LibraryReader):
             context: BrowserContext = browser.new_context()
 
             # ログイン
-            page: Page = context.new_page()
-            page.goto(self.URL)
-            page.get_by_role("link", name="マイ図書館メニューを開きます").click()
-            page.get_by_role("link", name="ログイン").click()
-            page.fill('input[name="username"]', self.card)
-            page.fill('input[name="j_password"]', self.password)
-            page.get_by_role("button", name="ログイン").click()
+            page: Page = self._login(context)
 
             page.click('a[id="stat-resv"]')
             page.wait_for_load_state()
@@ -172,6 +176,19 @@ class SuginamiLibraryReader(LibraryReader):
 class MinatoLibraryReader(LibraryReader):
     URL = "https://www.lib.city.minato.tokyo.jp/licsxp-opac/WOpacSmtMnuTopAction.do"
 
+    def _login(self, context) -> Page:
+        page: Page = context.new_page()
+
+        page.goto(self.URL)
+        page.get_by_role("link", name="マイ図書館メニューを開きます").click()
+        page.get_by_role("link", name="ログイン").click()
+        page.get_by_label("利用者番号").fill(self.card)
+        page.get_by_label("パスワード").fill(self.password)
+        page.get_by_role("button", name="ログイン").click()
+        page.wait_for_load_state()
+
+        return page
+
     @property
     def lent(self):
         with sync_playwright() as playwright:
@@ -179,13 +196,7 @@ class MinatoLibraryReader(LibraryReader):
             context: BrowserContext = browser.new_context()
 
             # ログイン
-            page: Page = context.new_page()
-            page.goto(self.URL)
-            page.get_by_role("link", name="マイ図書館メニューを開きます").click()
-            page.get_by_role("link", name="ログイン").click()
-            page.get_by_role("textbox", name="図書館利用カード番号").fill(self.card)
-            page.get_by_label("パスワード", exact=True).fill(self.password)
-            page.get_by_role("button", name="ログイン").click()
+            page: Page = self._login(context)
 
             page.click('a[id="stat-lent"]')
             page.wait_for_load_state()
@@ -225,13 +236,7 @@ class MinatoLibraryReader(LibraryReader):
             context: BrowserContext = browser.new_context()
 
             # ログイン
-            page: Page = context.new_page()
-            page.goto(self.URL)
-            page.get_by_role("link", name="マイ図書館メニューを開きます").click()
-            page.get_by_role("link", name="ログイン").click()
-            page.get_by_role("textbox", name="図書館利用カード番号").fill(self.card)
-            page.get_by_label("パスワード", exact=True).fill(self.password)
-            page.get_by_role("button", name="ログイン").click()
+            page: Page = self._login(context)
 
             page.click('a[id="stat-resv"]')
             page.wait_for_load_state()
@@ -276,6 +281,18 @@ class MinatoLibraryReader(LibraryReader):
 class NerimaLibraryReader(LibraryReader):
     URL = "https://www.lib.nerima.tokyo.jp/"
 
+    def _login(self, context) -> Page:
+        # ログイン
+        page: Page = context.new_page()
+        page.goto(self.URL)
+        page.get_by_role("link", name="利用者ログイン").click()
+        page.get_by_placeholder("利用者ID").fill(self.card)
+        page.get_by_placeholder("パスワード").fill(self.password)
+        page.get_by_role("button", name="送信").click()
+        page.wait_for_load_state()
+
+        return page
+
     @property
     def lent(self):
         with sync_playwright() as playwright:
@@ -283,13 +300,7 @@ class NerimaLibraryReader(LibraryReader):
             context: BrowserContext = browser.new_context()
 
             # ログイン
-            page: Page = context.new_page()
-            page.goto(self.URL)
-            page.get_by_role("link", name="利用者ログイン").click()
-            page.get_by_placeholder("利用者ID").fill(self.card)
-            page.get_by_placeholder("パスワード").fill(self.password)
-            page.get_by_role("button", name="送信").click()
-            page.wait_for_load_state()
+            page: Page = self._login(context)
 
             # 表示切替え
             page.click("#ContentLend-tab")
@@ -328,13 +339,7 @@ class NerimaLibraryReader(LibraryReader):
             context: BrowserContext = browser.new_context()
 
             # ログイン
-            page = context.new_page()
-            page.goto(self.URL)
-            page.get_by_role("link", name="利用者ログイン").click()
-            page.get_by_placeholder("利用者ID").fill(self.card)
-            page.get_by_placeholder("パスワード").fill(self.password)
-            page.get_by_role("button", name="送信").click()
-            page.wait_for_load_state()
+            page: Page = self._login(context)
 
             # 表示切替え
             page.click("#ContentRsv-tab")

@@ -1,7 +1,6 @@
 from typing import List
-from playwright.sync_api import sync_playwright, Playwright
 from abc import ABCMeta
-
+from playwright.sync_api import sync_playwright, Playwright
 from playwright.sync_api._generated import Browser, BrowserContext, Locator, Page
 from model import LentItem, ReserveItem
 

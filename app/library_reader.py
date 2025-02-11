@@ -1,10 +1,13 @@
+from typing import List
 from playwright.sync_api import sync_playwright, Playwright
 from abc import ABCMeta
+
+from playwright.sync_api._generated import Browser, BrowserContext, Locator, Page
 from model import LentItem, ReserveItem
 
 
 def create_browser(playwright: Playwright):
-    browser = playwright.chromium.launch(
+    browser: Browser = playwright.chromium.launch(
         # headless=True,
         # downloads_path="/tmp",
         args=[
@@ -53,7 +56,7 @@ def create_browser(playwright: Playwright):
 
 
 class LibraryReader(metaclass=ABCMeta):
-    URL = ""
+    URL: str
 
     def __init__(self, user, password) -> None:
         self.card = user
@@ -76,32 +79,30 @@ class SuginamiLibraryReader(LibraryReader):
     @property
     def lent(self):
         with sync_playwright() as playwright:
-            browser = create_browser(playwright)
-            context = browser.new_context()
+            browser: Browser = create_browser(playwright)
+            context: BrowserContext = browser.new_context()
 
-            # login
-            page = context.new_page()
+            # ログインする
+            page: Page = context.new_page()
             page.goto(self.URL)
             page.get_by_role("link", name="マイ図書館メニューを開きます").click()
             page.get_by_role("link", name="ログイン").click()
-
-            # fill username/password
             page.fill('input[name="username"]', self.card)
             page.fill('input[name="j_password"]', self.password)
             page.get_by_role("button", name="ログイン").click()
 
-            # load page
+            # ページ読み込み
             page.click('a[id="stat-lent"]')
             page.wait_for_load_state()
 
-            # scraping page
-            titles = page.locator("div.title > a > strong").all_inner_texts()
+            # ページをスクレイピング
+            titles: List[str] = page.locator("div.title > a > strong").all_inner_texts()
             titles = [title.replace("\u3000", " ") for title in titles]
-            tmp = page.locator("div.matter").all_inner_texts()
-            contents = [tmp[i : i + 6] for i in range(0, len(tmp), 6)]
+            tmp: List[str] = page.locator("div.matter").all_inner_texts()
+            contents: List[List[str]] = [tmp[i : i + 6] for i in range(0, len(tmp), 6)]
 
-            # create items
-            items = []
+            # アイテムを作る
+            items: List = []
             for t, d in zip(titles, contents):
                 items.append(
                     LentItem(
@@ -123,11 +124,11 @@ class SuginamiLibraryReader(LibraryReader):
     @property
     def reserve(self):
         with sync_playwright() as playwright:
-            browser = create_browser(playwright)
-            context = browser.new_context()
+            browser: Browser = create_browser(playwright)
+            context: BrowserContext = browser.new_context()
 
-            # login
-            page = context.new_page()
+            # ログイン
+            page: Page = context.new_page()
             page.goto(self.URL)
             page.get_by_role("link", name="マイ図書館メニューを開きます").click()
             page.get_by_role("link", name="ログイン").click()
@@ -135,19 +136,18 @@ class SuginamiLibraryReader(LibraryReader):
             page.fill('input[name="j_password"]', self.password)
             page.get_by_role("button", name="ログイン").click()
 
-            # goto page
             page.click('a[id="stat-resv"]')
             page.wait_for_load_state()
 
-            # scraping page
-            titles = page.locator("div.title > strong").all_inner_texts()
+            # ページをスクレイピング
+            titles: List[str] = page.locator("div.title > strong").all_inner_texts()
             titles = [title.replace("\u3000", " ").lstrip() for title in titles]
-            categories = page.locator("div.intro").all_inner_texts()
-            tmp = page.locator("div.matter").all_inner_texts()
-            contents = [tmp[i : i + 9] for i in range(0, len(tmp), 9)]
+            categories: List[str] = page.locator("div.intro").all_inner_texts()
+            tmp: List[str] = page.locator("div.matter").all_inner_texts()
+            contents: List[List[str]] = [tmp[i : i + 9] for i in range(0, len(tmp), 9)]
 
-            # create items
-            items = []
+            # アイテムを作る
+            items: List = []
             for t, c, d in zip(titles, categories, contents):
                 items.append(
                     ReserveItem(
@@ -175,11 +175,11 @@ class MinatoLibraryReader(LibraryReader):
     @property
     def lent(self):
         with sync_playwright() as playwright:
-            browser = create_browser(playwright)
-            context = browser.new_context()
+            browser: Browser = create_browser(playwright)
+            context: BrowserContext = browser.new_context()
 
-            # login
-            page = context.new_page()
+            # ログイン
+            page: Page = context.new_page()
             page.goto(self.URL)
             page.get_by_role("link", name="マイ図書館メニューを開きます").click()
             page.get_by_role("link", name="ログイン").click()
@@ -187,18 +187,19 @@ class MinatoLibraryReader(LibraryReader):
             page.get_by_label("パスワード", exact=True).fill(self.password)
             page.get_by_role("button", name="ログイン").click()
 
-            # goto page
             page.click('a[id="stat-lent"]')
             page.wait_for_load_state()
 
-            # scraping page
-            titles = page.locator("div.title > a > strong").all_inner_texts()
-            titles = [title.replace("\u3000", " ") for title in titles]
-            tmp = page.locator("div.matter").all_inner_texts()
-            contents = [tmp[i : i + 6] for i in range(0, len(tmp), 6)]
+            # ページをスクレイピング
+            locator: Locator = page.locator("div.title > a > strong")
+            titles: List[str] = locator.all_inner_texts()
 
-            # create items
-            items = []
+            titles = [title.replace("\u3000", " ") for title in titles]
+            tmp: List[str] = page.locator("div.matter").all_inner_texts()
+            contents: List[List[str]] = [tmp[i : i + 6] for i in range(0, len(tmp), 6)]
+
+            # アイテムを作る
+            items: List = []
             for t, d in zip(titles, contents):
                 items.append(
                     LentItem(
@@ -220,11 +221,11 @@ class MinatoLibraryReader(LibraryReader):
     @property
     def reserve(self):
         with sync_playwright() as playwright:
-            browser = create_browser(playwright)
-            context = browser.new_context()
+            browser: Browser = create_browser(playwright)
+            context: BrowserContext = browser.new_context()
 
-            # login
-            page = context.new_page()
+            # ログイン
+            page: Page = context.new_page()
             page.goto(self.URL)
             page.get_by_role("link", name="マイ図書館メニューを開きます").click()
             page.get_by_role("link", name="ログイン").click()
@@ -232,21 +233,26 @@ class MinatoLibraryReader(LibraryReader):
             page.get_by_label("パスワード", exact=True).fill(self.password)
             page.get_by_role("button", name="ログイン").click()
 
-            # goto page
             page.click('a[id="stat-resv"]')
             page.wait_for_load_state()
 
-            # scraping page
-            titles = page.locator(
+            # ページをスクレイピング
+            locator: Locator = page.locator(
                 "div.main > div > div > div > div.title > strong"
-            ).all_inner_texts()
-            titles = [title.replace("\u3000", " ").lstrip() for title in titles]
-            categories = page.locator("div.intro").all_inner_texts()
-            tmp = page.locator("div.matter").all_inner_texts()
-            contents = [tmp[i : i + 7] for i in range(0, len(tmp), 7)]
+            )
+            titles: List[str] = [
+                title.replace("\u3000", " ").lstrip()
+                for title in locator.all_inner_texts()
+            ]
+            categories: List[str] = page.locator("div.intro").all_inner_texts()
 
-            # create items
-            items = []
+            locator2: Locator = page.locator("div.matter")
+            tmp: List[str] = locator2.all_inner_texts()
+            # tmp: List[str] = page.locator("div.matter").all_inner_texts()
+            contents: List[List[str]] = [tmp[i : i + 7] for i in range(0, len(tmp), 7)]
+
+            # アイテムを作る
+            items: List = []
             for t, c, d in zip(titles, categories, contents):
                 items.append(
                     ReserveItem(
@@ -268,16 +274,16 @@ class MinatoLibraryReader(LibraryReader):
 
 
 class NerimaLibraryReader(LibraryReader):
-    URL = "https://www.lib.nerima.tokyo.jp/index.html"
+    URL = "https://www.lib.nerima.tokyo.jp/"
 
     @property
     def lent(self):
         with sync_playwright() as playwright:
-            browser = create_browser(playwright)
-            context = browser.new_context()
+            browser: Browser = create_browser(playwright)
+            context: BrowserContext = browser.new_context()
 
-            # login
-            page = context.new_page()
+            # ログイン
+            page: Page = context.new_page()
             page.goto(self.URL)
             page.get_by_role("link", name="利用者ログイン").click()
             page.get_by_placeholder("利用者ID").fill(self.card)
@@ -285,29 +291,30 @@ class NerimaLibraryReader(LibraryReader):
             page.get_by_role("button", name="送信").click()
             page.wait_for_load_state()
 
-            # goto page
-            page.click('a[href="#ContentLend"]')
+            # 表示切替え
+            page.click("#ContentLend-tab")
             page.wait_for_load_state()
 
-            # scraping page
-            tmp = page.locator(
-                "#ContentLend > form > div:nth-child(7) > table > tbody > tr > td"
-            ).all_inner_texts()
-            contents = [tmp[i : i + 11] for i in range(0, len(tmp), 11)]
-
-            # create items
-            items = []
-            for c in contents:
-                items.append(
-                    LentItem(
-                        is_extendable=True if c[1] == "延長" else False,
-                        title=c[2],
-                        category=c[3],
-                        checkout_location=c[5],
-                        checkout_date=c[6],
-                        return_date=c[7],
-                    )
+            # ページをスクレイピング
+            items: List[LentItem] = []
+            for i in range(1, 20):
+                locator: Locator = page.locator(
+                    f"#ContentLend > form > div > table > tbody > tr:nth-child({i * 2}) > td"
                 )
+
+                # 行の中のテキストを取得できたらアイテムにする
+                content: List[str] = locator.all_inner_texts()
+                if content:
+                    items.append(
+                        LentItem(
+                            is_extendable=True if content[1] == "延長" else False,
+                            title=content[2],
+                            category=content[3],
+                            checkout_location=content[5],
+                            checkout_date=content[6],
+                            return_date=content[7],
+                        )
+                    )
 
             context.close()
             browser.close()
@@ -317,10 +324,10 @@ class NerimaLibraryReader(LibraryReader):
     @property
     def reserve(self):
         with sync_playwright() as playwright:
-            browser = create_browser(playwright)
-            context = browser.new_context()
+            browser: Browser = create_browser(playwright)
+            context: BrowserContext = browser.new_context()
 
-            # login
+            # ログイン
             page = context.new_page()
             page.goto(self.URL)
             page.get_by_role("link", name="利用者ログイン").click()
@@ -329,31 +336,33 @@ class NerimaLibraryReader(LibraryReader):
             page.get_by_role("button", name="送信").click()
             page.wait_for_load_state()
 
-            # goto page
-            page.click('a[href="#ContentRsv"]')
+            # 表示切替え
+            page.click("#ContentRsv-tab")
             page.wait_for_load_state()
 
-            # scraping page
-            tmp = page.locator(
-                "#ContentRsv > form > div:nth-child(9) > table > tbody > tr > td"
-            ).all_inner_texts()
-            contents = [tmp[i : i + 12] for i in range(0, len(tmp), 12)]
-
-            # create items
-            items = []
-            for c in contents:
-                items.append(
-                    ReserveItem(
-                        reserve_status=c[1],
-                        reserve_rank=c[2],
-                        title=c[3],
-                        category=c[4],
-                        reserve_date=c[6],
-                        reserve_expire_date=c[7],
-                        receive_location=c[9],
-                        notification_method=c[10],
-                    )
+            # ページをスクレイピング
+            items: List[ReserveItem] = []
+            for i in range(1, 20):
+                locator: Locator = page.locator(
+                    f"#ContentRsv > form > div > table > tbody > tr:nth-child({i}) > td"
                 )
+
+                # 行の中のテキストを取得できたらアイテムにする
+                content: List[str] = locator.all_inner_texts()
+
+                if content:
+                    items.append(
+                        ReserveItem(
+                            reserve_status=content[1],
+                            reserve_rank=content[2],
+                            title=content[3],
+                            category=content[4],
+                            reserve_date=content[6],
+                            reserve_expire_date=content[7],
+                            receive_location=content[9],
+                            notification_method=content[10],
+                        )
+                    )
 
             context.close()
             browser.close()

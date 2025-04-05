@@ -9,7 +9,7 @@ from time import sleep
 
 def create_browser(playwright: Playwright):
     browser: Browser = playwright.chromium.launch(
-        headless=False,
+        # headless=False,
         # downloads_path="/tmp",
         args=[
             # "--autoplay-policy=user-gesture-required",

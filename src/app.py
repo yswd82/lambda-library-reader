@@ -1,8 +1,8 @@
 from dataclasses import asdict
-from library_reader import (
+from src.minato import MinatoLibraryReader
+from src.nerima import NerimaLibraryReader
+from src.suginami import (
     SuginamiLibraryReader,
-    MinatoLibraryReader,
-    NerimaLibraryReader,
 )
 
 

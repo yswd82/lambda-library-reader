@@ -82,7 +82,9 @@ class SuginamiLibraryReader(LibraryReader):
                         return_date=elements[i * cnt_unit + 4],
                         reserved_count=elements[i * cnt_unit + 5],
                         extend_count=elements[i * cnt_unit + 6],
-                        is_reserved=True if elements[i * cnt_unit + 5] > 0 else False,
+                        is_reserved=True
+                        if int(elements[i * cnt_unit + 5]) > 0
+                        else False,
                     )
                 )
 

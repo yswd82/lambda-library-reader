@@ -57,6 +57,7 @@ class MinatoLibraryReader(LibraryReader):
 
             # ログイン
             page: Page = self._login(context)
+            page.wait_for_load_state()
 
             # 貸出中ページへ移動
             page.click('a[id="stat-lent"]')

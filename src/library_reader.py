@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from playwright.sync_api import Playwright
 from playwright.sync_api._generated import Browser, Page
-from src.model import LentItem, ReserveItem
+from model import LentItem, ReserveItem
 
 
 def create_browser(playwright: Playwright):

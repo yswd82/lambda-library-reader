@@ -1,9 +1,10 @@
 from dataclasses import asdict
-from src.minato import MinatoLibraryReader
-from src.nerima import NerimaLibraryReader
-from src.suginami import (
+from minato import MinatoLibraryReader
+from nerima import NerimaLibraryReader
+from suginami import (
     SuginamiLibraryReader,
 )
+from nakano import NakanoLibraryReader
 
 
 def lambda_handler(event, context):
@@ -20,6 +21,8 @@ def lambda_handler(event, context):
         lib_reader = MinatoLibraryReader(userid, password)
     elif area == "nerima":
         lib_reader = NerimaLibraryReader(userid, password)
+    elif area == "nakano":
+        lib_reader = NakanoLibraryReader(userid, password)
     else:
         raise Exception
 

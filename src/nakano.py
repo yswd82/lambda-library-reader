@@ -1,5 +1,5 @@
-from src.library_reader import LibraryReader, create_browser
-from src.model import LentItem, ReserveItem
+from library_reader import LibraryReader, create_browser
+from model import LentItem, ReserveItem
 
 from playwright.sync_api import sync_playwright
 from playwright.sync_api._generated import Browser, BrowserContext, Page

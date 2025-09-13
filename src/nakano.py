@@ -87,12 +87,12 @@ class NakanoLibraryReader(LibraryReader):
                 items.append(
                     LentItem(
                         title=elements[i * cnt_unit + 2],
-                        category=None,
+                        category="",
                         checkout_location=elements[i * cnt_unit + 5],
                         checkout_date=elements[i * cnt_unit + 3],
                         return_date=elements[i * cnt_unit + 4],
-                        reserved_count=None,
-                        extend_count=None,
+                        reserved_count="",
+                        extend_count="",
                         is_reserved=True
                         if len(elements[i * cnt_unit + 8]) > 0
                         else False,
@@ -144,14 +144,14 @@ class NakanoLibraryReader(LibraryReader):
                     .replace("\n", "")
                     .replace("\r", "")
                     .strip(),
-                    category=None,
+                    category="",
                     receive_location=elements[i * cnt_unit + 3].split("\n")[1],
                     notification_method=elements[i * cnt_unit + 6].split("\n")[1],
                     reserve_date=elements[i * cnt_unit + 2].split("\n")[0],
                     reserve_rank=elements[i * cnt_unit + 2].split("\n")[2],
                     reserve_status=elements[i * cnt_unit + 1],
-                    reserve_cancel_reason=None,
-                    reserve_expire_date=None,
+                    reserve_cancel_reason="",
+                    reserve_expire_date="",
                 )
                 items.append(item)
 

@@ -9,12 +9,12 @@ from time import sleep
 
 class NakanoLibraryReader(LibraryReader):
     """
-    杉並区立図書館のWebサイトから貸出中・予約中の資料情報を取得するクラス。
+    中野区立図書館のWebサイトから貸出中・予約中の資料情報を取得するクラス。
 
     LibraryReader を継承し、Playwright を用いて自動的にログイン・スクレイピングを行う。
 
     Attributes:
-        URL (str): 杉並区立図書館のトップページURL。
+        URL (str): 中野区立図書館のトップページURL。
         card (str): 図書館利用カード番号（親クラスで設定）。
         password (str): ログイン用パスワード（親クラスで設定）。
     """
@@ -23,7 +23,7 @@ class NakanoLibraryReader(LibraryReader):
 
     def _login(self, context) -> Page:
         """
-        杉並区立図書館サイトにログインし、ログイン後のページオブジェクトを返す。
+        中野区立図書館サイトにログインし、ログイン後のページオブジェクトを返す。
 
         Args:
             context (BrowserContext): Playwright のブラウザコンテキスト。
@@ -67,6 +67,7 @@ class NakanoLibraryReader(LibraryReader):
                 "#main > form:nth-child(2) > fieldset > div > table > tbody > tr > td"
             ).all_inner_texts()
 
+            # タブ文字などのクレンジング
             elements = [
                 e.replace("\t", "").replace("\n", "").replace("\r", "").strip()
                 for e in elements
@@ -129,31 +130,77 @@ class NakanoLibraryReader(LibraryReader):
                 "#main > form:nth-child(7) > fieldset > div > table > tbody > tr > td"
             ).all_inner_texts()
 
+            # タブ文字のクレンジング
+            elements = [e.replace("\t", "") for e in elements]
+
             # # DEBUG:
             # for i, li in enumerate(elements):
             #     print(i, li)
 
-            # 8要素で1アイテム
-            cnt_unit = 8
-            cnt = len(elements) // cnt_unit
-
             items = []
-            for i in range(cnt):
-                item = ReserveItem(
-                    title=elements[i * cnt_unit + 4]
-                    .replace("\n", "")
-                    .replace("\r", "")
-                    .strip(),
-                    category="",
-                    receive_location=elements[i * cnt_unit + 3].split("\n")[1],
-                    notification_method=elements[i * cnt_unit + 6].split("\n")[1],
-                    reserve_date=elements[i * cnt_unit + 2].split("\n")[0],
-                    reserve_rank=elements[i * cnt_unit + 2].split("\n")[2],
-                    reserve_status=elements[i * cnt_unit + 1],
-                    reserve_cancel_reason="",
-                    reserve_expire_date="",
-                )
-                items.append(item)
+
+            # 8または9要素で1アイテムのため、先頭から順番にサーチする
+            i_offset = 0
+            i = 0
+            while i < len(elements):
+                if elements[i] in ("予約中", "取置済"):
+                    # 予約中の場合は8要素で1アイテムとなる
+                    if elements[i] == "予約中":
+                        cnt_unit = 8
+
+                        # オフセットの起点から取得する
+                        _title = (
+                            elements[i_offset + 4]
+                            .replace("\n", "")
+                            .replace("\r", "")
+                            .strip()
+                        )
+                        _category = ""
+                        _receive_location = elements[i_offset + 3].split("\n")[1]
+                        _notification_method = elements[i_offset + 6].split("\n")[1]
+                        _reserve_date = elements[i_offset + 2].split("\n")[0]
+                        _reserve_rank = elements[i_offset + 2].split("\n")[2]
+                        _reserve_status = elements[i_offset + 1]
+                        _reserve_cancel_reason = ""
+                        _reserve_expire_date = ""
+
+                        # 開始位置を進める
+                        i_offset += cnt_unit
+
+                    # 予約中の場合は9要素で1アイテムとなる
+                    elif elements[i] == "取置済":
+                        cnt_unit = 9
+
+                        # オフセットの起点から取得する
+                        _title = (
+                            elements[i + 5].replace("\n", "").replace("\r", "").strip()
+                        )
+                        _category = ""
+                        _receive_location = elements[i_offset + 4].split("\n")[1]
+                        _notification_method = elements[i_offset + 7].split("\n")[1]
+                        _reserve_date = elements[i_offset + 3].split("\n")[0]
+                        _reserve_rank = elements[i_offset + 3].split("\n")[2]
+                        _reserve_status = elements[i_offset + 2]
+                        _reserve_cancel_reason = ""
+                        _reserve_expire_date = elements[i_offset + 6].split("\n")[0]
+
+                        # 開始位置を進める
+                        i_offset += cnt_unit
+
+                    item = ReserveItem(
+                        title=_title,
+                        category=_category,
+                        receive_location=_receive_location,
+                        notification_method=_notification_method,
+                        reserve_date=_reserve_date,
+                        reserve_rank=_reserve_rank,
+                        reserve_status=_reserve_status,
+                        reserve_cancel_reason=_reserve_cancel_reason,
+                        reserve_expire_date=_reserve_expire_date,
+                    )
+                    items.append(item)
+
+                i += 1
 
             context.close()
             browser.close()

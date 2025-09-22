@@ -67,11 +67,8 @@ class NakanoLibraryReader(LibraryReader):
                 "#main > form:nth-child(2) > fieldset > div > table > tbody > tr > td"
             ).all_inner_texts()
 
-            # タブ文字などのクレンジング
-            elements = [
-                e.replace("\t", "").replace("\n", "").replace("\r", "").strip()
-                for e in elements
-            ]
+            # タブ文字のクレンジングと改行でリスト分割
+            elements = [e.replace("\t", "").strip().split("\n") for e in elements]
 
             # # DEBUG:
             # for i, e in enumerate(elements):
@@ -87,11 +84,11 @@ class NakanoLibraryReader(LibraryReader):
             for i in range(cnt):
                 items.append(
                     LentItem(
-                        title=elements[i * cnt_unit + 2],
+                        title="".join(elements[i * cnt_unit + 2]),
                         category="",
-                        checkout_location=elements[i * cnt_unit + 5],
-                        checkout_date=elements[i * cnt_unit + 3],
-                        return_date=elements[i * cnt_unit + 4],
+                        checkout_location=elements[i * cnt_unit + 5][0],
+                        checkout_date=elements[i * cnt_unit + 3][0],
+                        return_date=elements[i * cnt_unit + 4][0],
                         reserved_count="",
                         extend_count="",
                         is_reserved=True
@@ -130,8 +127,8 @@ class NakanoLibraryReader(LibraryReader):
                 "#main > form:nth-child(7) > fieldset > div > table > tbody > tr > td"
             ).all_inner_texts()
 
-            # タブ文字のクレンジング
-            elements = [e.replace("\t", "") for e in elements]
+            # タブ文字のクレンジングと改行でリスト分割
+            elements = [e.replace("\t", "").strip().split("\n") for e in elements]
 
             # # DEBUG:
             # for i, li in enumerate(elements):
@@ -139,53 +136,40 @@ class NakanoLibraryReader(LibraryReader):
 
             items = []
 
-            # 8または9要素で1アイテムのため、先頭から順番にサーチする
-            i_offset = 0
+            # 先頭から順番にサーチする
             i = 0
+            i_offset = 0
             while i < len(elements):
-                if elements[i] in ("予約中", "取置済"):
-                    # 予約中の場合は8要素で1アイテムとなる
-                    if elements[i] == "予約中":
-                        cnt_unit = 8
+                if elements[i][0] in ("予約中", "取置済"):
+                    # 予約中または取置済の文言の2個前が開始位置のときは、開始位置の1個後の要素を消し、インデックスを1つ前に戻す
+                    # この操作によって必ず8要素で1アイテムになる
+                    if i_offset + 2 == i:
+                        del elements[i_offset + 1]
+                        i -= 1
 
-                        # オフセットの起点から取得する
-                        _title = (
-                            elements[i_offset + 4]
-                            .replace("\n", "")
-                            .replace("\r", "")
-                            .strip()
-                        )
-                        _category = ""
-                        _receive_location = elements[i_offset + 3].split("\n")[1]
-                        _notification_method = elements[i_offset + 6].split("\n")[1]
-                        _reserve_date = elements[i_offset + 2].split("\n")[0]
-                        _reserve_rank = elements[i_offset + 2].split("\n")[2]
-                        _reserve_status = elements[i_offset + 1]
-                        _reserve_cancel_reason = ""
-                        _reserve_expire_date = ""
+                    cnt_unit = 8
 
-                        # 開始位置を進める
-                        i_offset += cnt_unit
+                    # オフセットの起点から取得する
+                    _title = "".join(elements[i_offset + 4])
+                    _category = ""
+                    _receive_location = elements[i_offset + 3][1]
+                    _notification_method = (
+                        elements[i_offset + 6][0]
+                        if len(elements[i_offset + 6]) == 1
+                        else elements[i_offset + 6][1]
+                    )
+                    _reserve_date = elements[i_offset + 2][0]
+                    _reserve_rank = (
+                        elements[i_offset + 2][2]
+                        if len(elements[i_offset + 2]) == 3
+                        else ""
+                    )
+                    _reserve_status = elements[i_offset + 1][0]
+                    _reserve_cancel_reason = ""
+                    _reserve_expire_date = ""
 
-                    # 予約中の場合は9要素で1アイテムとなる
-                    elif elements[i] == "取置済":
-                        cnt_unit = 9
-
-                        # オフセットの起点から取得する
-                        _title = (
-                            elements[i + 5].replace("\n", "").replace("\r", "").strip()
-                        )
-                        _category = ""
-                        _receive_location = elements[i_offset + 4].split("\n")[1]
-                        _notification_method = elements[i_offset + 7].split("\n")[1]
-                        _reserve_date = elements[i_offset + 3].split("\n")[0]
-                        _reserve_rank = elements[i_offset + 3].split("\n")[2]
-                        _reserve_status = elements[i_offset + 2]
-                        _reserve_cancel_reason = ""
-                        _reserve_expire_date = elements[i_offset + 6].split("\n")[0]
-
-                        # 開始位置を進める
-                        i_offset += cnt_unit
+                    # 開始位置を進める
+                    i_offset += cnt_unit
 
                     item = ReserveItem(
                         title=_title,

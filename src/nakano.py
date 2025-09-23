@@ -96,6 +96,7 @@ class NakanoLibraryReader(BaseLibraryReader):
                     else ""
                 )
                 reserve_status = elements[i_offset + 1][0]
+                reserve_expire_date = elements[i_offset + 5][0]
 
                 items.append(
                     ReserveItem(
@@ -107,7 +108,7 @@ class NakanoLibraryReader(BaseLibraryReader):
                         reserve_rank=reserve_rank,
                         reserve_status=reserve_status,
                         reserve_cancel_reason="",
-                        reserve_expire_date="",
+                        reserve_expire_date=reserve_expire_date,
                     )
                 )
                 i_offset += self.RESERVE_UNIT

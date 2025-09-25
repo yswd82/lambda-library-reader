@@ -22,12 +22,18 @@ class MinatoLibraryReader(BaseLibraryReader):
 
     def _parse_lent(self, page: Page) -> List[LentItem]:
         page.click('a[id="stat-lent"]')
-        page.wait_for_load_state()
+
+        _locator_title = "div.title > a > strong"
+        _locator_body = "div.matter"
+
+        page.wait_for_selector(_locator_title)
+        page.wait_for_selector(_locator_body)
+
         titles = [
             t.replace("\u3000", " ")
-            for t in page.locator("div.title > a > strong").all_inner_texts()
+            for t in page.locator(_locator_title).all_inner_texts()
         ]
-        tmp = page.locator("div.matter").all_inner_texts()
+        tmp = page.locator(_locator_body).all_inner_texts()
         contents = self._chunk(tmp, 6)
         return [
             LentItem(
@@ -45,13 +51,21 @@ class MinatoLibraryReader(BaseLibraryReader):
 
     def _parse_reserve(self, page: Page) -> List[ReserveItem]:
         page.click('a[id="stat-resv"]')
-        page.wait_for_load_state()
+
+        _locator_title = "div.title > strong"
+        _locator_category = "div.intro"
+        _locator_body = "div.matter"
+
+        page.wait_for_selector(_locator_title)
+        page.wait_for_selector(_locator_category)
+        page.wait_for_selector(_locator_body)
+
         titles = [
             t.replace("\u3000", " ").lstrip()
-            for t in page.locator("div.title > strong").all_inner_texts()
+            for t in page.locator(_locator_title).all_inner_texts()
         ]
-        categories = page.locator("div.intro").all_inner_texts()
-        tmp = page.locator("div.matter").all_inner_texts()
+        categories = page.locator(_locator_category).all_inner_texts()
+        tmp = page.locator(_locator_body).all_inner_texts()
         contents = self._chunk(tmp, 7)
         return [
             ReserveItem(

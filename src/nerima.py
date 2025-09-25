@@ -32,9 +32,10 @@ class NerimaLibraryReader(BaseLibraryReader):
 
         items: List[LentItem] = []
         for i in range(1, self.MAX_ROWS):
-            elements: List[str] = page.locator(
-                f"#ContentLend > form > div > table > tbody > tr:nth-child({i * 2}) > td"
-            ).all_inner_texts()
+            _locator = f"#ContentLend > form > div > table > tbody > tr:nth-child({i * 2}) > td"
+            # page.wait_for_selector(_locator)
+
+            elements: List[str] = page.locator(_locator).all_inner_texts()
 
             if elements:
                 items.append(
@@ -57,9 +58,11 @@ class NerimaLibraryReader(BaseLibraryReader):
 
         items: List[ReserveItem] = []
         for i in range(1, self.MAX_ROWS):
-            elements: List[str] = page.locator(
+            _locator = (
                 f"#ContentRsv > form > div > table > tbody > tr:nth-child({i}) > td"
-            ).all_inner_texts()
+            )
+
+            elements: List[str] = page.locator(_locator).all_inner_texts()
 
             if elements:
                 items.append(

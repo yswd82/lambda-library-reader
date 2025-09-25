@@ -27,11 +27,13 @@ class NakanoLibraryReader(BaseLibraryReader):
 
     def _parse_lent(self, page: Page) -> List[LentItem]:
         page.get_by_role("link", name="●貸出中一覧").click()
-        page.wait_for_load_state()
 
-        elements: List[str] = page.locator(
+        _locator = (
             "#main > form:nth-child(2) > fieldset > div > table > tbody > tr > td"
-        ).all_inner_texts()
+        )
+        page.wait_for_selector(_locator)
+
+        elements: List[str] = page.locator(_locator).all_inner_texts()
 
         # タブ除去＋改行分割
         elements = [e.replace("\t", "").strip().split("\n") for e in elements]
@@ -64,11 +66,13 @@ class NakanoLibraryReader(BaseLibraryReader):
 
     def _parse_reserve(self, page: Page) -> List[ReserveItem]:
         page.get_by_role("link", name="●予約中一覧").click()
-        page.wait_for_load_state()
 
-        elements: List[str] = page.locator(
+        _locator = (
             "#main > form:nth-child(7) > fieldset > div > table > tbody > tr > td"
-        ).all_inner_texts()
+        )
+        page.wait_for_selector(_locator)
+
+        elements: List[str] = page.locator(_locator).all_inner_texts()
 
         elements = [e.replace("\t", "").strip().split("\n") for e in elements]
 

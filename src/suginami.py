@@ -31,11 +31,11 @@ class SuginamiLibraryReader(BaseLibraryReader):
 
     def _parse_lent(self, page: Page) -> List[LentItem]:
         page.get_by_title("あなたが現在借りている資料です").click()
-        page.wait_for_load_state()
 
-        elements: List[str] = page.locator(
-            "div.main > table > tbody > tr > td"
-        ).all_inner_texts()
+        _locator = "div.main > table > tbody > tr > td"
+        page.wait_for_selector(_locator)
+
+        elements: List[str] = page.locator(_locator).all_inner_texts()
 
         rows = self._chunk(elements, self.LENT_UNIT)
 
@@ -55,11 +55,11 @@ class SuginamiLibraryReader(BaseLibraryReader):
 
     def _parse_reserve(self, page: Page) -> List[ReserveItem]:
         page.get_by_title("あなたが現在予約している資料です").click()
-        page.wait_for_load_state()
 
-        elements: List[str] = page.locator(
-            "table#ItemDetaTable > tbody > tr > td"
-        ).all_inner_texts()
+        _locator = "table#ItemDetaTable > tbody > tr > td"
+        page.wait_for_selector(_locator)
+
+        elements: List[str] = page.locator(_locator).all_inner_texts()
 
         rows = self._chunk(elements, self.RESERVE_UNIT)
 

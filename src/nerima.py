@@ -72,7 +72,7 @@ class NerimaLibraryReader(BaseLibraryReader):
                         title=elements[3],
                         category=elements[4],
                         reserve_date=elements[6],
-                        reserve_expire_date=elements[7],
+                        reserve_expire_date=elements[7].replace("\u00a0", ""),
                         receive_location=elements[9],
                         notification_method=elements[10],
                     )

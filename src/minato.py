@@ -76,7 +76,7 @@ class MinatoLibraryReader(BaseLibraryReader):
                 reserve_date=d[2].replace("予約日:", ""),
                 reserve_rank=d[4].replace("予約順位:", ""),
                 reserve_status=d[5].replace("予約状態:", ""),
-                reserve_expire_date=d[6].replace("取置期限:", "").strip(),
+                reserve_expire_date=d[6].replace("取置期限:", "").replace(" ", ""),
             )
             for t, c, d in zip(titles, categories, contents)
         ]

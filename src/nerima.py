@@ -33,7 +33,6 @@ class NerimaLibraryReader(BaseLibraryReader):
         items: List[LentItem] = []
         for i in range(1, self.MAX_ROWS):
             _locator = f"#ContentLend > form > div > table > tbody > tr:nth-child({i * 2}) > td"
-            # page.wait_for_selector(_locator)
 
             elements: List[str] = page.locator(_locator).all_inner_texts()
 
@@ -67,8 +66,8 @@ class NerimaLibraryReader(BaseLibraryReader):
             if elements:
                 items.append(
                     ReserveItem(
-                        reserve_status=elements[1],
-                        reserve_rank=elements[2],
+                        reserve_status=elements[1].replace("\n", ""),
+                        reserve_rank=elements[2].split(" ")[0],
                         title=elements[3],
                         category=elements[4],
                         reserve_date=elements[6],

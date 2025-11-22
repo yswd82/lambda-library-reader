@@ -70,8 +70,6 @@ class MinatoLibraryReader(BaseLibraryReader):
 
         items = []
         for t, c, d in zip(titles, categories, contents):
-            print(d)
-
             # 受取館の文字列にクレンジング後、要素数が1の場合は決定済み。そうでない場合は選択可能状態なので空白にする
             _receive_location = (
                 d[0].replace("受取館: \n受取館\n", "")

@@ -63,17 +63,27 @@ class SuginamiLibraryReader(BaseLibraryReader):
 
         rows = self._chunk(elements, self.RESERVE_UNIT)
 
-        return [
-            ReserveItem(
+        items = []
+        for row in rows:
+            # 受取場所と連絡方法が2要素の場合は内容が確定している。
+            _receive_location = (
+                row[2].split("\n")[0] if len(row[2].split("\n")) == 2 else "選択可"
+            )
+            _notification_method = (
+                row[2].split("\n")[1] if len(row[2].split("\n")) == 2 else "選択可"
+            )
+
+            item = ReserveItem(
                 title=row[0],
                 category=row[1],
-                receive_location="",  # ページに情報なし
-                notification_method="",  # ページに情報なし
+                receive_location=_receive_location,
+                notification_method=_notification_method,
                 reserve_date=row[3].split("\n")[0],
                 reserve_rank=row[4],
                 reserve_status=row[5],
                 reserve_cancel_reason=row[6],
                 reserve_expire_date=row[7],
             )
-            for row in rows
-        ]
+            items.append(item)
+
+        return items

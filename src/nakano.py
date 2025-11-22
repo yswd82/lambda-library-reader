@@ -44,8 +44,10 @@ class NakanoLibraryReader(BaseLibraryReader):
 
         items: List[LentItem] = []
         for row in rows:
+            print(row)
+
             title = "".join(row[2])
-            is_reserved = len(row[8]) > 0
+            is_reserved = len(row[8][0]) > 0
             checkout_location = row[5][0]
             checkout_date = row[3][0]
             return_date = row[4][0]

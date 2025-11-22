@@ -68,7 +68,7 @@ class NerimaLibraryReader(BaseLibraryReader):
                     ReserveItem(
                         reserve_status=elements[1].replace("\n", ""),
                         reserve_rank=elements[2].split(" ")[0],
-                        title=elements[3],
+                        title=elements[3].strip(),
                         category=elements[4],
                         reserve_date=elements[6],
                         reserve_expire_date=elements[7].replace("\u00a0", ""),

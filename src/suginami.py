@@ -74,7 +74,7 @@ class SuginamiLibraryReader(BaseLibraryReader):
             )
 
             item = ReserveItem(
-                title=row[0],
+                title=row[0].strip(),
                 category=row[1],
                 receive_location=_receive_location,
                 notification_method=_notification_method,

@@ -67,16 +67,35 @@ class MinatoLibraryReader(BaseLibraryReader):
         categories = page.locator(_locator_category).all_inner_texts()
         tmp = page.locator(_locator_body).all_inner_texts()
         contents = self._chunk(tmp, 7)
-        return [
-            ReserveItem(
+
+        items = []
+        for t, c, d in zip(titles, categories, contents):
+            print(d)
+
+            # 受取館の文字列にクレンジング後、要素数が1の場合は決定済み。そうでない場合は選択可能状態なので空白にする
+            _receive_location = (
+                d[0].replace("受取館: \n受取館\n", "")
+                if len(d[0].replace("受取館: \n受取館\n", "").split("\n")) == 1
+                else "選択可"
+            )
+
+            # 連絡方法の文字列をクレンジング後、要素数が1の場合は決定済み。そうでない場合は選択可能状態なので空白にする
+            _notification_method = (
+                d[1].replace("連絡方法: \n連絡方法\n", "")
+                if len(d[1].replace("連絡方法: \n連絡方法\n", "").split("\n")) == 1
+                else "選択可"
+            )
+
+            item = ReserveItem(
                 title=t,
                 category=c,
-                receive_location="",
-                notification_method="",
+                receive_location=_receive_location,
+                notification_method=_notification_method,
                 reserve_date=d[2].replace("予約日:", ""),
                 reserve_rank=d[4].replace("予約順位:", ""),
-                reserve_status=d[5].replace("予約状態:", ""),
+                reserve_status=d[5].replace("予約状態:", "").replace(" ", ""),
                 reserve_expire_date=d[6].replace("取置期限:", "").replace(" ", ""),
             )
-            for t, c, d in zip(titles, categories, contents)
-        ]
+            items.append(item)
+
+        return items

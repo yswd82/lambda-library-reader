@@ -12,7 +12,9 @@ class NakanoLibraryReader(BaseLibraryReader):
     """
 
     URL = "https://www.kn.licsre-saas.jp/tokyo-nakano/webopac/usermenu.do?target=adult/"
+    # 貸出アイテムの構成要素数
     LENT_UNIT = 10
+    # 予約アイテムの構成要素数
     RESERVE_UNIT = 8
 
     def _login(self, context: BrowserContext) -> Page:
@@ -44,23 +46,24 @@ class NakanoLibraryReader(BaseLibraryReader):
 
         items: List[LentItem] = []
         for row in rows:
-            print(row)
-
             title = "".join(row[2])
             is_reserved = len(row[8][0]) > 0
             checkout_location = row[5][0]
             checkout_date = row[3][0]
             return_date = row[4][0]
+            is_extendable = "貸出延長" in row[9][0]
+            extend_count = 0 if is_extendable else 1
 
             items.append(
                 LentItem(
                     title=title,
-                    category="",
+                    # category="",
                     checkout_location=checkout_location,
                     checkout_date=checkout_date,
                     return_date=return_date,
-                    reserved_count="",
-                    extend_count="",
+                    # reserved_count="",
+                    is_extendable=is_extendable,
+                    extend_count=extend_count,
                     is_reserved=is_reserved,
                 )
             )
@@ -107,13 +110,13 @@ class NakanoLibraryReader(BaseLibraryReader):
                 items.append(
                     ReserveItem(
                         title=title,
-                        category="",
+                        # category="",
                         receive_location=receive_location,
                         notification_method=notification_method,
                         reserve_date=reserve_date,
                         reserve_rank=reserve_rank,
                         reserve_status=reserve_status,
-                        reserve_cancel_reason="",
+                        # reserve_cancel_reason="",
                         reserve_expire_date=reserve_expire_date,
                     )
                 )

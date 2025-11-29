@@ -6,7 +6,7 @@ from dateutil import parser
 @dataclass
 class LentItem:
     """
-    図書館などで貸出中のアイテムを表すデータクラス。
+    貸出中のアイテムを表すデータクラス。
 
     Attributes:
         title (str): アイテムのタイトル（書籍名など）。
@@ -25,9 +25,9 @@ class LentItem:
     checkout_date: str = field(default=None)
     return_date: str = field(default=None)
     reserved_count: int = field(default=None)
-    is_extendable: bool = field(default=None)
-    extend_count: int = field(default=None)
     is_reserved: bool = field(default=None)
+    extend_count: int = field(default=None)
+    is_extendable: bool = field(default=None)
 
     @property
     def is_expired(self) -> bool:
@@ -43,7 +43,7 @@ class LentItem:
 @dataclass
 class ReserveItem:
     """
-    図書館などで予約中のアイテムを表すデータクラス。
+    予約中のアイテムを表すデータクラス。
 
     Attributes:
         title (str): アイテムのタイトル（書籍名など）。

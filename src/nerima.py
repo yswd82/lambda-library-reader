@@ -44,7 +44,7 @@ class NerimaLibraryReader(BaseLibraryReader):
                 checkout_date = elements[6]
                 return_date = elements[7]
                 is_extendable = elements[1] == "延長"
-                extend_count = ""  # 未対応
+                extend_count = None  # 未対応
                 is_reserved = False  # 未対応
 
                 items.append(

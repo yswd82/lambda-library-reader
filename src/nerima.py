@@ -33,19 +33,26 @@ class NerimaLibraryReader(BaseLibraryReader):
 
         items: List[LentItem] = []
         for i in range(1, self.MAX_ROWS):
-            SELECTOR = f"#ContentLend > form > div > table > tbody > tr:nth-child({i * 2}) > td"
+            SELECTOR_UPPER = f"#ContentLend > form > div > table > tbody > tr:nth-child({i * 2}) > td"
+            SELECTOR_LOWER = f"#ContentLend > form > div > table > tbody > tr:nth-child({i * 2 + 1}) > td"
 
-            elements: List[str] = page.locator(SELECTOR).all_inner_texts()
+            elements_upper: List[str] = page.locator(SELECTOR_UPPER).all_inner_texts()
+            elements_lower: List[str] = page.locator(SELECTOR_LOWER).all_inner_texts()
 
-            if elements:
-                title = elements[2]
-                category = elements[3]
-                checkout_location = elements[5]
-                checkout_date = elements[6]
-                return_date = elements[7]
-                is_extendable = elements[1] == "延長"
-                extend_count = None  # 未対応
-                is_reserved = False  # 未対応
+            # print("elements:", elements_upper)
+            # print("elements:", elements_lower)
+
+            if elements_upper:
+                title = elements_upper[2]
+                category = elements_upper[3]
+                checkout_location = elements_upper[5]
+                checkout_date = elements_upper[6]
+                return_date = elements_upper[7]
+                is_extendable = True if "延長" == elements_upper[1] else False
+                extend_count = 1 if "すでに延長されています" in elements_upper[1] else 0
+                is_reserved = (
+                    True if "予約待ちあり" in elements_lower[1].strip() else False
+                )
 
                 items.append(
                     LentItem(
@@ -59,6 +66,8 @@ class NerimaLibraryReader(BaseLibraryReader):
                         is_reserved=is_reserved,
                     )
                 )
+
+                # print(items[-1])
         return items
 
     def _parse_reserve(self, page: Page) -> List[ReserveItem]:

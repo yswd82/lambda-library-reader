@@ -24,11 +24,15 @@ class MinatoLibraryReader(BaseLibraryReader):
     def _parse_lent(self, page: Page) -> List[LentItem]:
         page.click('a[id="stat-lent"]')
 
-        SELECTOR_TITLE = "div.title > a > strong"
-        SELECTOR_BODY = "div.matter"
+        try:
+            SELECTOR_TITLE = "div.title > a > strong"
+            SELECTOR_BODY = "div.matter"
 
-        page.wait_for_selector(SELECTOR_TITLE)
-        page.wait_for_selector(SELECTOR_BODY)
+            page.wait_for_selector(SELECTOR_TITLE)
+            page.wait_for_selector(SELECTOR_BODY)
+        except Exception:
+            # 借りている本が無い場合は空リストを返す
+            return []
 
         titles = [
             t.replace("\u3000", " ")
@@ -76,13 +80,18 @@ class MinatoLibraryReader(BaseLibraryReader):
     def _parse_reserve(self, page: Page) -> List[ReserveItem]:
         page.click('a[id="stat-resv"]')
 
-        SELECTOR_TITLE = "div.title > strong"
-        SELECTOR_CATEGORY = "div.intro"
-        SELECTOR_BODY = "div.matter"
+        try:
+            SELECTOR_TITLE = "div.title > strong"
+            SELECTOR_CATEGORY = "div.intro"
+            SELECTOR_BODY = "div.matter"
 
-        page.wait_for_selector(SELECTOR_TITLE)
-        page.wait_for_selector(SELECTOR_CATEGORY)
-        page.wait_for_selector(SELECTOR_BODY)
+            page.wait_for_selector(SELECTOR_TITLE)
+            page.wait_for_selector(SELECTOR_CATEGORY)
+            page.wait_for_selector(SELECTOR_BODY)
+
+        except Exception:
+            # 予約本が無い場合は空リストを返す
+            return []
 
         titles = [
             t.replace("\u3000", " ").lstrip()

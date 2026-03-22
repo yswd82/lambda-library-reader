@@ -129,6 +129,9 @@ class MinatoLibraryReader(BaseLibraryReader):
                 if content[6].replace("取置期限:", "").replace(" ", "")
                 else None
             )
+            _is_canceled = (
+                False if _reserve_status in ("予約中です", "ご用意できました") else None
+            )
 
             items.append(
                 ReserveItem(
@@ -140,7 +143,7 @@ class MinatoLibraryReader(BaseLibraryReader):
                     reserve_rank=_reserve_rank,
                     reserve_status=_reserve_status,
                     reserve_expire_date=_reserve_expire_date,
-                    is_canceled=None,
+                    is_canceled=_is_canceled,
                 )
             )
 

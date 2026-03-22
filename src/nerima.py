@@ -102,6 +102,12 @@ class NerimaLibraryReader(BaseLibraryReader):
                 _receive_location = elements[9]
                 _notification_method = elements[10]
 
+                _is_canceled = (
+                    False
+                    if _reserve_status
+                    in ("予約解除可能", "移送中です", "ご用意できました")
+                    else None
+                )
                 items.append(
                     ReserveItem(
                         reserve_status=_reserve_status,
@@ -112,7 +118,7 @@ class NerimaLibraryReader(BaseLibraryReader):
                         reserve_expire_date=_reserve_expire_date,
                         receive_location=_receive_location,
                         notification_method=_notification_method,
-                        is_canceled=None,
+                        is_canceled=_is_canceled,
                     )
                 )
         return items

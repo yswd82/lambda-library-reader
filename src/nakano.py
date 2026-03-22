@@ -82,30 +82,37 @@ class NakanoLibraryReader(BaseLibraryReader):
         elements = [e.replace("\t", "").strip().split("\n") for e in elements]
 
         items: List[ReserveItem] = []
-        i, i_offset = 0, 0
 
+        i = 0
         while i < len(elements):
-            if elements[i][0] in ("予約中", "取置済"):
-                # 要素数調整（必ず8要素に揃える）
-                if i_offset + 2 == i:
-                    del elements[i_offset + 1]
-                    i -= 1
+            parse_elements = []
+            if elements[i][0] and elements[i][0] in ("予約中", "取置済"):
+                # 予約中または取り置き済みの場合は、i-1 から i+6 までの要素を取得する
+                parse_elements = elements[i - 1 : i + 7]
 
-                _title = "".join(elements[i_offset + 4])
-                _receive_location = elements[i_offset + 3][1]
+            elif elements[i][0] and elements[i][0] in ("回送中"):
+                # 回送中の場合は、i-2 から i+6 までの要素を取得し、1番目の要素を削除する
+                del elements[i - 1]
+                i = i - 1
+
+                parse_elements = elements[i - 1 : i + 7]
+
+            if parse_elements:
+                # print(i, elements[i], parse_elements)
+
+                _title = "".join(parse_elements[4])
+                _receive_location = parse_elements[3][1]
                 _notification_method = (
-                    elements[i_offset + 6][0]
-                    if len(elements[i_offset + 6]) == 1
-                    else elements[i_offset + 6][1]
+                    parse_elements[6][0]
+                    if len(parse_elements[6]) == 1
+                    else parse_elements[6][1]
                 )
-                _reserve_date = elements[i_offset + 2][0]
+                _reserve_date = parse_elements[2][0]
                 _reserve_rank = (
-                    elements[i_offset + 2][2]
-                    if len(elements[i_offset + 2]) == 3
-                    else ""
+                    parse_elements[2][2] if len(parse_elements[2]) == 3 else ""
                 )
-                _reserve_status = elements[i_offset + 1][0]
-                _reserve_expire_date = elements[i_offset + 5][0]
+                _reserve_status = parse_elements[1][0]
+                _reserve_expire_date = parse_elements[5][0]
 
                 items.append(
                     ReserveItem(
@@ -121,7 +128,7 @@ class NakanoLibraryReader(BaseLibraryReader):
                         is_canceled=None,
                     )
                 )
-                i_offset += self.RESERVE_UNIT
+
             i += 1
 
         return items

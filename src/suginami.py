@@ -91,25 +91,28 @@ class SuginamiLibraryReader(BaseLibraryReader):
                 row[2].split("\n")[1] if len(row[2].split("\n")) == 2 else "選択可"
             )
 
-            title = row[0].strip()
-            category = row[1]
-            reserve_date = row[3].split("\n")[0]
-            reserve_rank = row[4]
-            reserve_status = row[5]
-            reserve_cancel_reason = row[6]
-            reserve_expire_date = row[7]
+            _title = row[0].strip()
+            _category = row[1]
+            _reserve_date = row[3].split("\n")[0]
+            _reserve_rank = row[4]
+            _reserve_status = row[5]
+            _reserve_cancel_reason = row[6]
+            _reserve_expire_date = row[7]
+
+            _is_canceled = _reserve_status in ("取消・手配不可")
 
             items.append(
                 ReserveItem(
-                    title=title,
-                    category=category,
+                    title=_title,
+                    category=_category,
                     receive_location=_receive_location,
                     notification_method=_notification_method,
-                    reserve_date=reserve_date,
-                    reserve_rank=reserve_rank,
-                    reserve_status=reserve_status,
-                    reserve_cancel_reason=reserve_cancel_reason,
-                    reserve_expire_date=reserve_expire_date,
+                    reserve_date=_reserve_date,
+                    reserve_rank=_reserve_rank,
+                    reserve_status=_reserve_status,
+                    reserve_cancel_reason=_reserve_cancel_reason,
+                    reserve_expire_date=_reserve_expire_date,
+                    is_canceled=_is_canceled,
                 )
             )
 

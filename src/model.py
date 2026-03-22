@@ -66,3 +66,4 @@ class ReserveItem:
     reserve_status: str = field(default=None)
     reserve_cancel_reason: str = field(default=None)
     reserve_expire_date: str = field(default=None)
+    is_canceled: bool = field(default=None)

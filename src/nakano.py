@@ -46,25 +46,25 @@ class NakanoLibraryReader(BaseLibraryReader):
 
         items: List[LentItem] = []
         for row in rows:
-            title = "".join(row[2])
-            is_reserved = len(row[8][0]) > 0
-            checkout_location = row[5][0]
-            checkout_date = row[3][0]
-            return_date = row[4][0]
-            is_extendable = "貸出延長" in row[9][0]
-            extend_count = 0 if is_extendable else 1
+            _title = "".join(row[2])
+            _is_reserved = len(row[8][0]) > 0
+            _checkout_location = row[5][0]
+            _checkout_date = row[3][0]
+            _return_date = row[4][0]
+            _is_extendable = "貸出延長" in row[9][0]
+            _extend_count = 0 if _is_extendable else 1
 
             items.append(
                 LentItem(
-                    title=title,
+                    title=_title,
                     # category="",
-                    checkout_location=checkout_location,
-                    checkout_date=checkout_date,
-                    return_date=return_date,
+                    checkout_location=_checkout_location,
+                    checkout_date=_checkout_date,
+                    return_date=_return_date,
                     # reserved_count="",
-                    is_extendable=is_extendable,
-                    extend_count=extend_count,
-                    is_reserved=is_reserved,
+                    is_extendable=_is_extendable,
+                    extend_count=_extend_count,
+                    is_reserved=_is_reserved,
                 )
             )
         return items
@@ -91,33 +91,34 @@ class NakanoLibraryReader(BaseLibraryReader):
                     del elements[i_offset + 1]
                     i -= 1
 
-                title = "".join(elements[i_offset + 4])
-                receive_location = elements[i_offset + 3][1]
-                notification_method = (
+                _title = "".join(elements[i_offset + 4])
+                _receive_location = elements[i_offset + 3][1]
+                _notification_method = (
                     elements[i_offset + 6][0]
                     if len(elements[i_offset + 6]) == 1
                     else elements[i_offset + 6][1]
                 )
-                reserve_date = elements[i_offset + 2][0]
-                reserve_rank = (
+                _reserve_date = elements[i_offset + 2][0]
+                _reserve_rank = (
                     elements[i_offset + 2][2]
                     if len(elements[i_offset + 2]) == 3
                     else ""
                 )
-                reserve_status = elements[i_offset + 1][0]
-                reserve_expire_date = elements[i_offset + 5][0]
+                _reserve_status = elements[i_offset + 1][0]
+                _reserve_expire_date = elements[i_offset + 5][0]
 
                 items.append(
                     ReserveItem(
-                        title=title,
+                        title=_title,
                         # category="",
-                        receive_location=receive_location,
-                        notification_method=notification_method,
-                        reserve_date=reserve_date,
-                        reserve_rank=reserve_rank,
-                        reserve_status=reserve_status,
+                        receive_location=_receive_location,
+                        notification_method=_notification_method,
+                        reserve_date=_reserve_date,
+                        reserve_rank=_reserve_rank,
+                        reserve_status=_reserve_status,
                         # reserve_cancel_reason="",
-                        reserve_expire_date=reserve_expire_date,
+                        reserve_expire_date=_reserve_expire_date,
+                        is_canceled=None,
                     )
                 )
                 i_offset += self.RESERVE_UNIT

@@ -43,35 +43,35 @@ class MinatoLibraryReader(BaseLibraryReader):
 
         items = []
         for t, d in zip(titles, contents):
-            title = t
-            category = d[0]
-            checkout_location = d[1].replace("貸出館： ", "")
-            checkout_date = d[2].replace("貸出日： ", "")
-            return_date = d[3].replace("返却期日： ", "")
-            reserved_count = (
+            _title = t
+            _category = d[0]
+            _checkout_location = d[1].replace("貸出館： ", "")
+            _checkout_date = d[2].replace("貸出日： ", "")
+            _return_date = d[3].replace("返却期日： ", "")
+            _reserved_count = (
                 int(d[4].replace("予約数： ", ""))
                 if d[4].replace("予約数： ", "").isnumeric()
                 else None
             )
-            extend_count = (
+            _extend_count = (
                 int(d[5].replace("延長回数： ", ""))
                 if d[5].replace("延長回数： ", "").isnumeric()
                 else None
             )
-            is_reserved = int(d[4].replace("予約数： ", "")) > 0
-            is_extendable = extend_count == 0 and not is_reserved
+            _is_reserved = int(d[4].replace("予約数： ", "")) > 0
+            _is_extendable = _extend_count == 0 and not _is_reserved
 
             items.append(
                 LentItem(
-                    title=title,
-                    category=category,
-                    checkout_location=checkout_location,
-                    checkout_date=checkout_date,
-                    return_date=return_date,
-                    reserved_count=reserved_count,
-                    extend_count=extend_count,
-                    is_reserved=is_reserved,
-                    is_extendable=is_extendable,
+                    title=_title,
+                    category=_category,
+                    checkout_location=_checkout_location,
+                    checkout_date=_checkout_date,
+                    return_date=_return_date,
+                    reserved_count=_reserved_count,
+                    extend_count=_extend_count,
+                    is_reserved=_is_reserved,
+                    is_extendable=_is_extendable,
                 )
             )
 
@@ -102,29 +102,29 @@ class MinatoLibraryReader(BaseLibraryReader):
         contents = self._chunk(tmp, 7)
 
         items = []
-        for title, category, content in zip(titles, categories, contents):
+        for _title, _category, content in zip(titles, categories, contents):
             # 受取館の文字列にクレンジング後、要素数が1の場合は決定済み。そうでない場合は選択可能状態なので空白にする
-            receive_location = (
+            _receive_location = (
                 content[0].replace("受取館: \n受取館\n", "")
                 if len(content[0].replace("受取館: \n受取館\n", "").split("\n")) == 1
                 else "選択可"
             )
 
             # 連絡方法の文字列をクレンジング後、要素数が1の場合は決定済み。そうでない場合は選択可能状態なので空白にする
-            notification_method = (
+            _notification_method = (
                 content[1].replace("連絡方法: \n連絡方法\n", "")
                 if len(content[1].replace("連絡方法: \n連絡方法\n", "").split("\n"))
                 == 1
                 else "選択可"
             )
-            reserve_date = content[2].replace("予約日:", "")
-            reserve_rank = (
+            _reserve_date = content[2].replace("予約日:", "")
+            _reserve_rank = (
                 int(content[4].replace("予約順位:", ""))
                 if content[4].replace("予約順位:", "").isnumeric()
                 else None
             )
-            reserve_status = content[5].replace("予約状態:", "").replace(" ", "")
-            reserve_expire_date = (
+            _reserve_status = content[5].replace("予約状態:", "").replace(" ", "")
+            _reserve_expire_date = (
                 content[6].replace("取置期限:", "").replace(" ", "")
                 if content[6].replace("取置期限:", "").replace(" ", "")
                 else None
@@ -132,14 +132,15 @@ class MinatoLibraryReader(BaseLibraryReader):
 
             items.append(
                 ReserveItem(
-                    title=title,
-                    category=category,
-                    receive_location=receive_location,
-                    notification_method=notification_method,
-                    reserve_date=reserve_date,
-                    reserve_rank=reserve_rank,
-                    reserve_status=reserve_status,
-                    reserve_expire_date=reserve_expire_date,
+                    title=_title,
+                    category=_category,
+                    receive_location=_receive_location,
+                    notification_method=_notification_method,
+                    reserve_date=_reserve_date,
+                    reserve_rank=_reserve_rank,
+                    reserve_status=_reserve_status,
+                    reserve_expire_date=_reserve_expire_date,
+                    is_canceled=None,
                 )
             )
 

@@ -43,27 +43,29 @@ class NerimaLibraryReader(BaseLibraryReader):
             # print("elements:", elements_lower)
 
             if elements_upper:
-                title = elements_upper[2]
-                category = elements_upper[3]
-                checkout_location = elements_upper[5]
-                checkout_date = elements_upper[6]
-                return_date = elements_upper[7]
-                is_extendable = True if "延長" == elements_upper[1] else False
-                extend_count = 1 if "すでに延長されています" in elements_upper[1] else 0
-                is_reserved = (
+                _title = elements_upper[2]
+                _category = elements_upper[3]
+                _checkout_location = elements_upper[5]
+                _checkout_date = elements_upper[6]
+                _return_date = elements_upper[7]
+                _is_extendable = True if "延長" == elements_upper[1] else False
+                _extend_count = (
+                    1 if "すでに延長されています" in elements_upper[1] else 0
+                )
+                _is_reserved = (
                     True if "予約待ちあり" in elements_lower[1].strip() else False
                 )
 
                 items.append(
                     LentItem(
-                        title=title,
-                        category=category,
-                        checkout_location=checkout_location,
-                        checkout_date=checkout_date,
-                        return_date=return_date,
-                        is_extendable=is_extendable,
-                        extend_count=extend_count,
-                        is_reserved=is_reserved,
+                        title=_title,
+                        category=_category,
+                        checkout_location=_checkout_location,
+                        checkout_date=_checkout_date,
+                        return_date=_return_date,
+                        is_extendable=_is_extendable,
+                        extend_count=_extend_count,
+                        is_reserved=_is_reserved,
                     )
                 )
 
@@ -83,33 +85,34 @@ class NerimaLibraryReader(BaseLibraryReader):
             elements: List[str] = page.locator(SELECTOR).all_inner_texts()
 
             if elements:
-                reserve_status = elements[1].replace("\n", "")
-                reserve_rank = (
+                _reserve_status = elements[1].replace("\n", "")
+                _reserve_rank = (
                     int(elements[2].split(" ")[0])
                     if elements[2].split(" ")[0].isnumeric()
                     else None
                 )
-                title = elements[3].strip()
-                category = elements[4]
-                reserve_date = elements[6]
-                reserve_expire_date = (
+                _title = elements[3].strip()
+                _category = elements[4]
+                _reserve_date = elements[6]
+                _reserve_expire_date = (
                     elements[7].replace("\u00a0", "")
                     if elements[7].replace("\u00a0", "")
                     else None
                 )
-                receive_location = elements[9]
-                notification_method = elements[10]
+                _receive_location = elements[9]
+                _notification_method = elements[10]
 
                 items.append(
                     ReserveItem(
-                        reserve_status=reserve_status,
-                        reserve_rank=reserve_rank,
-                        title=title,
-                        category=category,
-                        reserve_date=reserve_date,
-                        reserve_expire_date=reserve_expire_date,
-                        receive_location=receive_location,
-                        notification_method=notification_method,
+                        reserve_status=_reserve_status,
+                        reserve_rank=_reserve_rank,
+                        title=_title,
+                        category=_category,
+                        reserve_date=_reserve_date,
+                        reserve_expire_date=_reserve_expire_date,
+                        receive_location=_receive_location,
+                        notification_method=_notification_method,
+                        is_canceled=None,
                     )
                 )
         return items

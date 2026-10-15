@@ -1,7 +1,7 @@
 # Define function directory
 ARG FUNCTION_DIR="/function"
 
-FROM mcr.microsoft.com/playwright/python:v1.58.0-amd64 AS build-image
+FROM mcr.microsoft.com/playwright:v1.64.0-noble AS build-image
 
 # Install aws-lambda-cpp build dependencies
 RUN apt-get update
@@ -10,6 +10,7 @@ RUN apt-get install -y make
 RUN apt-get install -y cmake
 RUN apt-get install -y unzip
 RUN apt-get install -y libcurl4-openssl-dev
+RUN apt-get update && apt-get install -y python3-pip
 
 # Include global arg in this stage of the build
 ARG FUNCTION_DIR
@@ -21,14 +22,14 @@ RUN mkdir -p ${FUNCTION_DIR}
 COPY src/* ${FUNCTION_DIR}
 
 # Install the runtime interface client
-RUN python -m pip install --upgrade pip
-RUN python -m pip install --target ${FUNCTION_DIR} playwright awslambdaric
+# RUN python3 -m pip install --upgrade pip --break-system-packages
+RUN python3 -m pip install --target ${FUNCTION_DIR} playwright==1.64.0 awslambdaric --break-system-packages
 
 # Install the runtime (you need)
-RUN python -m pip install --target ${FUNCTION_DIR} boto3 pandas
+RUN python3 -m pip install --target ${FUNCTION_DIR} boto3 pandas --break-system-packages
 
 # Multi-stage build: grab a fresh copy of the base image
-FROM mcr.microsoft.com/playwright/python:v1.58.0-amd64
+FROM mcr.microsoft.com/playwright:v1.64.0-noble
 
 # Include global arg in this stage of the build
 ARG FUNCTION_DIR

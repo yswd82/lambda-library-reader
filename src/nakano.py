@@ -1,9 +1,7 @@
-from library_reader import BaseLibraryReader
-from model import LentItem, ReserveItem
-
 from playwright.sync_api._generated import BrowserContext, Page
 
-from typing import List
+from library_reader import BaseLibraryReader
+from model import LentItem, ReserveItem
 
 
 class NakanoLibraryReader(BaseLibraryReader):
@@ -27,15 +25,21 @@ class NakanoLibraryReader(BaseLibraryReader):
 
         return page
 
-    def _parse_lent(self, page: Page) -> List[LentItem]:
+    def _parse_lent(self, page: Page) -> list[LentItem]:
         page.get_by_role("link", name="●貸出中一覧").click()
 
         _locator = (
             "#main > form:nth-child(2) > fieldset > div > table > tbody > tr > td"
         )
-        page.wait_for_selector(_locator)
+        # 貸出本は無い場合がある
+        try:
+            page.locator(_locator)
+        except Exception as e:
+            print("貸出中一覧の取得に失敗しました。")
+            print(e)
+            return []
 
-        elements: List[str] = page.locator(_locator).all_inner_texts()
+        elements: list[str] = page.locator(_locator).all_inner_texts()
 
         # タブ除去＋改行分割
         elements = [e.replace("\t", "").strip().split("\n") for e in elements]
@@ -44,7 +48,7 @@ class NakanoLibraryReader(BaseLibraryReader):
             for i in range(0, len(elements), self.LENT_UNIT)
         ]
 
-        items: List[LentItem] = []
+        items: list[LentItem] = []
         for row in rows:
             _title = "".join(row[2])
             _is_reserved = len(row[8][0]) > 0
@@ -69,7 +73,7 @@ class NakanoLibraryReader(BaseLibraryReader):
             )
         return items
 
-    def _parse_reserve(self, page: Page) -> List[ReserveItem]:
+    def _parse_reserve(self, page: Page) -> list[ReserveItem]:
         page.get_by_role("link", name="●予約中一覧").click()
 
         _locator = (
@@ -77,11 +81,11 @@ class NakanoLibraryReader(BaseLibraryReader):
         )
         page.wait_for_selector(_locator)
 
-        elements: List[str] = page.locator(_locator).all_inner_texts()
+        elements: list[str] = page.locator(_locator).all_inner_texts()
 
         elements = [e.replace("\t", "").strip().split("\n") for e in elements]
 
-        items: List[ReserveItem] = []
+        items: list[ReserveItem] = []
 
         i = 0
         while i < len(elements):

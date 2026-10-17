@@ -1,9 +1,7 @@
-from library_reader import BaseLibraryReader
-from model import LentItem, ReserveItem
-
 from playwright.sync_api._generated import BrowserContext, Page
 
-from typing import List
+from library_reader import BaseLibraryReader
+from model import LentItem, ReserveItem
 
 
 class MinatoLibraryReader(BaseLibraryReader):
@@ -21,7 +19,7 @@ class MinatoLibraryReader(BaseLibraryReader):
         page.wait_for_load_state()
         return page
 
-    def _parse_lent(self, page: Page) -> List[LentItem]:
+    def _parse_lent(self, page: Page) -> list[LentItem]:
         page.click('a[id="stat-lent"]')
 
         try:
@@ -77,7 +75,7 @@ class MinatoLibraryReader(BaseLibraryReader):
 
         return items
 
-    def _parse_reserve(self, page: Page) -> List[ReserveItem]:
+    def _parse_reserve(self, page: Page) -> list[ReserveItem]:
         page.click('a[id="stat-resv"]')
 
         try:

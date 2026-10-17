@@ -1,9 +1,7 @@
-from library_reader import BaseLibraryReader
-from model import LentItem, ReserveItem
-
 from playwright.sync_api._generated import BrowserContext, Page
 
-from typing import List
+from library_reader import BaseLibraryReader
+from model import LentItem, ReserveItem
 
 
 class NerimaLibraryReader(BaseLibraryReader):
@@ -27,17 +25,17 @@ class NerimaLibraryReader(BaseLibraryReader):
 
         return page
 
-    def _parse_lent(self, page: Page) -> List[LentItem]:
+    def _parse_lent(self, page: Page) -> list[LentItem]:
         page.click("#ContentLend-tab")
         page.wait_for_load_state()
 
-        items: List[LentItem] = []
+        items: list[LentItem] = []
         for i in range(1, self.MAX_ROWS):
             SELECTOR_UPPER = f"#ContentLend > form > div > table > tbody > tr:nth-child({i * 2}) > td"
             SELECTOR_LOWER = f"#ContentLend > form > div > table > tbody > tr:nth-child({i * 2 + 1}) > td"
 
-            elements_upper: List[str] = page.locator(SELECTOR_UPPER).all_inner_texts()
-            elements_lower: List[str] = page.locator(SELECTOR_LOWER).all_inner_texts()
+            elements_upper: list[str] = page.locator(SELECTOR_UPPER).all_inner_texts()
+            elements_lower: list[str] = page.locator(SELECTOR_LOWER).all_inner_texts()
 
             # print("elements:", elements_upper)
             # print("elements:", elements_lower)
@@ -48,13 +46,11 @@ class NerimaLibraryReader(BaseLibraryReader):
                 _checkout_location = elements_upper[5]
                 _checkout_date = elements_upper[6]
                 _return_date = elements_upper[7]
-                _is_extendable = True if "延長" == elements_upper[1] else False
+                _is_extendable = "延長" == elements_upper[1]
                 _extend_count = (
                     1 if "すでに延長されています" in elements_upper[1] else 0
                 )
-                _is_reserved = (
-                    True if "予約待ちあり" in elements_lower[1].strip() else False
-                )
+                _is_reserved = "予約待ちあり" in elements_lower[1].strip()
 
                 items.append(
                     LentItem(
@@ -72,17 +68,17 @@ class NerimaLibraryReader(BaseLibraryReader):
                 # print(items[-1])
         return items
 
-    def _parse_reserve(self, page: Page) -> List[ReserveItem]:
+    def _parse_reserve(self, page: Page) -> list[ReserveItem]:
         page.click("#ContentRsv-tab")
         page.wait_for_load_state()
 
-        items: List[ReserveItem] = []
+        items: list[ReserveItem] = []
         for i in range(1, self.MAX_ROWS):
             SELECTOR = (
                 f"#ContentRsv > form > div > table > tbody > tr:nth-child({i}) > td"
             )
 
-            elements: List[str] = page.locator(SELECTOR).all_inner_texts()
+            elements: list[str] = page.locator(SELECTOR).all_inner_texts()
 
             if elements:
                 _reserve_status = elements[1].replace("\n", "")

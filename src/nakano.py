@@ -28,11 +28,11 @@ class NakanoLibraryReader(BaseLibraryReader):
     def _parse_lent(self, page: Page) -> list[LentItem]:
         page.get_by_role("link", name="●貸出中一覧").click()
 
-        _locator = (
-            "#main > form:nth-child(2) > fieldset > div > table > tbody > tr > td"
-        )
         # 貸出本は無い場合がある
         try:
+            _locator = (
+                "#main > form:nth-child(2) > fieldset > div > table > tbody > tr > td"
+            )
             page.locator(_locator)
         except Exception as e:
             print("貸出中一覧の取得に失敗しました。")

@@ -1,11 +1,7 @@
-from model import LentItem, ReserveItem
-
 from playwright.sync_api._generated import BrowserContext, Page
 
-from typing import List
-
-
 from library_reader import BaseLibraryReader
+from model import LentItem, ReserveItem
 
 
 class SuginamiLibraryReader(BaseLibraryReader):
@@ -27,7 +23,7 @@ class SuginamiLibraryReader(BaseLibraryReader):
 
         return page
 
-    def _parse_lent(self, page: Page) -> List[LentItem]:
+    def _parse_lent(self, page: Page) -> list[LentItem]:
         page.get_by_title("あなたが現在借りている資料です").click()
 
         # セレクタと構成要素数
@@ -36,7 +32,7 @@ class SuginamiLibraryReader(BaseLibraryReader):
 
         page.wait_for_selector(SELECTOR)
 
-        elements: List[str] = page.locator(SELECTOR).all_inner_texts()
+        elements: list[str] = page.locator(SELECTOR).all_inner_texts()
 
         rows = self._chunk(elements, LENT_UNIT)
 
@@ -68,7 +64,7 @@ class SuginamiLibraryReader(BaseLibraryReader):
 
         return items
 
-    def _parse_reserve(self, page: Page) -> List[ReserveItem]:
+    def _parse_reserve(self, page: Page) -> list[ReserveItem]:
         page.get_by_title("あなたが現在予約している資料です").click()
 
         # セレクタと構成要素数
@@ -77,7 +73,7 @@ class SuginamiLibraryReader(BaseLibraryReader):
 
         page.wait_for_selector(SELECTOR)
 
-        elements: List[str] = page.locator(SELECTOR).all_inner_texts()
+        elements: list[str] = page.locator(SELECTOR).all_inner_texts()
 
         rows = self._chunk(elements, RESERVE_UNIT)
 
